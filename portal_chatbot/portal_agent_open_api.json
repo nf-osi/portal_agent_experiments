@@ -1,0 +1,282 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "NF Portal Agent API",
+        "description": "API for the NF Data Portal chatbot assistant to search Synapse tables, access documentation, and provide portal navigation",
+        "version": "v1"
+    },
+    "paths": {
+        "/portal/v1/synapse/table/query": {
+            "post": {
+                "tags": ["PortalAgent"],
+                "description": "Search and query Synapse tables relevant to the NF Data Portal. Supports filtering, column selection, and pagination to find datasets, publications, studies, tools, people, and other resources.",
+                "operationId": "post_portal_v1_synapse_table_query",
+                "parameters": [],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/org.sagebionetworks.portal.TableQueryRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Query results from the Synapse table",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.sagebionetworks.portal.TableQueryResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/portal/v1/knowledge/search": {
+            "post": {
+                "tags": ["PortalAgent"],
+                "description": "Search the knowledge base containing NF Data Portal documentation and Synapse platform documentation. Use this to answer questions about how to use the portal, access data, understand usage requirements, and work with Synapse.",
+                "operationId": "post_portal_v1_knowledge_search",
+                "parameters": [],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/org.sagebionetworks.portal.KnowledgeSearchRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Relevant documentation and information from the knowledge base",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.sagebionetworks.portal.KnowledgeSearchResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/portal/v1/navigation/url": {
+            "post": {
+                "tags": ["PortalAgent"],
+                "description": "Generate properly formatted URLs for NF Data Portal pages, Synapse entities, and external resources. Use this to provide users with direct links to relevant pages.",
+                "operationId": "post_portal_v1_navigation_url",
+                "parameters": [],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/org.sagebionetworks.portal.NavigationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Formatted URL for the requested resource",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/org.sagebionetworks.portal.NavigationResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "org.sagebionetworks.portal.TableQueryRequest": {
+                "type": "object",
+                "properties": {
+                    "tableId": {
+                        "type": "string",
+                        "description": "The Synapse ID of the table to query (e.g., 'syn50913342' for Datasets). Common tables: syn50913342 (Datasets), syn16857542 (Publications), syn52694652 (Studies), syn51730943 (Tools), syn23564971 (People), syn52702673 (Files), syn51735464 (Observations), syn51750823 (Mutations)."
+                    },
+                    "columns": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Optional. Specific column names to retrieve. If omitted, all columns are returned. Use this to limit the response to only relevant fields."
+                    },
+                    "filters": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/org.sagebionetworks.portal.TableFilter"
+                        },
+                        "description": "Optional. Array of filter conditions to narrow down results. Multiple filters are combined with AND logic."
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "description": "Optional. Maximum number of rows to return. Default is 25. Use smaller values for quick searches, larger for comprehensive results.",
+                        "format": "int32",
+                        "default": 25
+                    },
+                    "offset": {
+                        "type": "integer",
+                        "description": "Optional. Number of rows to skip before returning results. Use for pagination.",
+                        "format": "int32",
+                        "default": 0
+                    }
+                },
+                "required": ["tableId"]
+            },
+            "org.sagebionetworks.portal.TableFilter": {
+                "type": "object",
+                "properties": {
+                    "columnName": {
+                        "type": "string",
+                        "description": "Name of the column to filter on"
+                    },
+                    "operator": {
+                        "type": "string",
+                        "description": "Comparison operator to use",
+                        "enum": ["EQUALS", "NOT_EQUALS", "CONTAINS", "NOT_CONTAINS", "GREATER_THAN", "LESS_THAN", "IN", "NOT_IN"]
+                    },
+                    "value": {
+                        "description": "Value(s) to compare against. Can be a string, number, boolean, or array for IN/NOT_IN operators"
+                    }
+                },
+                "required": ["columnName", "operator", "value"]
+            },
+            "org.sagebionetworks.portal.TableQueryResponse": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Column names/headers for the returned data"
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "description": "Array of row objects, each containing key-value pairs for column data"
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "description": "Total number of rows matching the query (before limit/offset)",
+                        "format": "int32"
+                    }
+                }
+            },
+            "org.sagebionetworks.portal.KnowledgeSearchRequest": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "The search query or question to find relevant documentation. Can be a natural language question or keywords.",
+                        "minLength": 3
+                    },
+                    "sources": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": ["nf_portal_docs", "synapse_docs", "all"]
+                        },
+                        "description": "Optional. Specify which knowledge base sources to search. Default is 'all'. Use 'nf_portal_docs' for portal-specific questions, 'synapse_docs' for Synapse platform questions.",
+                        "default": ["all"]
+                    },
+                    "maxResults": {
+                        "type": "integer",
+                        "description": "Optional. Maximum number of relevant documentation chunks to return. Default is 5.",
+                        "format": "int32",
+                        "default": 5
+                    }
+                },
+                "required": ["query"]
+            },
+            "org.sagebionetworks.portal.KnowledgeSearchResponse": {
+                "type": "object",
+                "properties": {
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/org.sagebionetworks.portal.KnowledgeResult"
+                        },
+                        "description": "Array of relevant documentation results"
+                    }
+                }
+            },
+            "org.sagebionetworks.portal.KnowledgeResult": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "string",
+                        "description": "The relevant documentation content or excerpt"
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "Source of this documentation (nf_portal_docs or synapse_docs)"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Title or heading of the documentation section"
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "Optional. URL to the full documentation page if available"
+                    },
+                    "relevanceScore": {
+                        "type": "number",
+                        "description": "Relevance score (0-1) indicating how well this result matches the query",
+                        "format": "float"
+                    }
+                }
+            },
+            "org.sagebionetworks.portal.NavigationRequest": {
+                "type": "object",
+                "properties": {
+                    "resourceType": {
+                        "type": "string",
+                        "description": "Type of resource to generate URL for",
+                        "enum": ["portal_page", "synapse_entity", "filtered_explore", "external_tool"]
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "For portal_page: path like '/Explore/Datasets', '/About'. For synapse_entity: the synID like 'syn50913342'. For external_tool: tool name like 'cavatica', 'pluto', 'terra'."
+                    },
+                    "filters": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "description": "Optional. For filtered_explore: key-value pairs to add as query parameters for pre-filtered views (e.g., {'diseaseFocus': 'Plexiform Neurofibroma', 'dataType': 'geneExpression'})"
+                    }
+                },
+                "required": ["resourceType", "path"]
+            },
+            "org.sagebionetworks.portal.NavigationResponse": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "The formatted URL for the requested resource"
+                    },
+                    "displayText": {
+                        "type": "string",
+                        "description": "Suggested display text for the link"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,170 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "This template contains all of the resources needed to create the NF Data Portal Bedrock Agent chatbot.",
+	"Parameters": {
+		"agentName": {
+			"Type": "String",
+			"Description": "The name of the Bedrock agent",
+			"Default": "nf-portal-chatbot"
+		},
+		"openApiSchemaS3Bucket": {
+			"Type": "String",
+			"Description": "The S3 bucket containing the OpenAPI schema file"
+		},
+		"openApiSchemaS3Key": {
+			"Type": "String",
+			"Description": "The S3 key (path) to the OpenAPI schema file",
+			"Default": "portal_agent_open_api.json"
+		},
+		"instructionsS3Bucket": {
+			"Type": "String",
+			"Description": "The S3 bucket containing the agent instructions file"
+		},
+		"instructionsS3Key": {
+			"Type": "String",
+			"Description": "The S3 key (path) to the agent instructions file",
+			"Default": "portal_agent_instructions.txt"
+		}
+	},
+	"Resources": {
+		"bedrockPortalAgentRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "bedrock.amazonaws.com"
+							},
+							"Action": "sts:AssumeRole",
+							"Condition": {
+								"StringEquals": {
+									"aws:SourceAccount": {
+										"Ref": "AWS::AccountId"
+									}
+								},
+								"ArnLike": {
+									"aws:SourceArn": {
+										"Fn::Sub": "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:agent/*"
+									}
+								}
+							}
+						}
+					]
+				},
+				"Policies": [
+					{
+						"PolicyName": "bedrockPortalAgentPolicy",
+						"PolicyDocument": {
+							"Version": "2012-10-17",
+							"Statement": [
+								{
+									"Effect": "Allow",
+									"Action": [
+										"bedrock:InvokeModel*",
+										"bedrock:GetInferenceProfile",
+										"bedrock:ListInferenceProfiles"
+									],
+									"Resource": [
+										"arn:aws:bedrock:us-east-1::foundation-model/*",
+										"arn:aws:bedrock:us-east-2::foundation-model/*",
+										"arn:aws:bedrock:us-west-2::foundation-model/*",
+										{
+											"Fn::Sub": "arn:aws:bedrock:us-east-1:${AWS::AccountId}:inference-profile/*"
+										}
+									]
+								},
+								{
+									"Effect": "Allow",
+									"Action": [
+										"s3:ListObject",
+										"s3:GetObject"
+									],
+									"Resource": [
+										{
+											"Fn::Sub": "arn:aws:s3:::${openApiSchemaS3Bucket}/*"
+										},
+										{
+											"Fn::Sub": "arn:aws:s3:::${instructionsS3Bucket}/*"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			}
+		},
+		"bedrockPortalAgent": {
+			"Type": "AWS::Bedrock::Agent",
+			"Properties": {
+				"ActionGroups": [
+					{
+						"ActionGroupExecutor": {
+							"CustomControl": "RETURN_CONTROL"
+						},
+						"ActionGroupName": "nf_portal_actions",
+						"ActionGroupState": "ENABLED",
+						"Description": "Functions to search Synapse tables, access knowledge base, and navigate the NF Data Portal.",
+						"ApiSchema": {
+							"S3": {
+								"S3BucketName": {
+									"Ref": "openApiSchemaS3Bucket"
+								},
+								"S3ObjectKey": {
+									"Ref": "openApiSchemaS3Key"
+								}
+							}
+						}
+					}
+				],
+				"AgentName": {
+					"Ref": "agentName"
+				},
+				"AgentResourceRoleArn": {
+					"Fn::GetAtt": [
+						"bedrockPortalAgentRole",
+						"Arn"
+					]
+				},
+				"AutoPrepare": true,
+				"Description": "AI assistant for the NF Data Portal, helping users discover datasets, publications, studies, and navigate Synapse resources.",
+				"FoundationModel": "us.anthropic.claude-opus-4-5-20251101-v1:0",
+				"IdleSessionTTLInSeconds": 3600,
+				"Instruction": "inserted from the context provider",
+				"SkipResourceInUseCheckOnDelete": true
+			}
+		}
+	},
+	"Outputs": {
+		"AgentId": {
+			"Description": "The ID of the created Bedrock agent",
+			"Value": {
+				"Fn::GetAtt": [
+					"bedrockPortalAgent",
+					"AgentId"
+				]
+			}
+		},
+		"AgentArn": {
+			"Description": "The ARN of the created Bedrock agent",
+			"Value": {
+				"Fn::GetAtt": [
+					"bedrockPortalAgent",
+					"AgentArn"
+				]
+			}
+		},
+		"AgentRoleArn": {
+			"Description": "The ARN of the IAM role used by the agent",
+			"Value": {
+				"Fn::GetAtt": [
+					"bedrockPortalAgentRole",
+					"Arn"
+				]
+			}
+		}
+	}
+}
