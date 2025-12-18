@@ -40,24 +40,24 @@
 	    </query__example>
 	  </examples>
 	</query__examples>
-	 You can update the cells of the grid using structured JSON objects, when directed by the user to make updates.  See the following update examples:
+	 You can update the cells of the grid using structured JSON objects, when directed by the user to make updates.  CRITICAL: All update requests must be wrapped in an 'update' object with a 'batch' array, and each SetValue must include a 'concreteType'. See the following update examples:
 	<update__examples>
 	  <examples>
 		<update__example>
 		  <description>Set age = 25 for rows where age is currently null.</description>
-		  <update__json>{"set":[{"columnName":"age","value":25}],"filters":[{"concreteType":"org.sagebionetworks.repo.model.grid.query.CellValueFilter","columnName":"age","operator":"IS_NULL"}]}</update__json>
+		  <update__json>{"update":{"batch":[{"set":[{"concreteType":"org.sagebionetworks.repo.model.grid.update.LiteralSetValue","columnName":"age","value":25}],"filters":[{"concreteType":"org.sagebionetworks.repo.model.grid.query.CellValueFilter","columnName":"age","operator":"IS_NULL"}]}]}}</update__json>
 		</update__example>
 		<update__example>
 		  <description>For rows where height > 12, set type = 'tall' and footing = null; cap updates at 10 rows.</description>
-		  <update__json>{"set":[{"columnName":"type","value":"tall"},{"columnName":"footing"}],"filters":[{"concreteType":"org.sagebionetworks.repo.model.grid.query.CellValueFilter","columnName":"height","operator":"GREATER_THAN","value":[12]}],"limit":10}</update__json>
+		  <update__json>{"update":{"batch":[{"set":[{"concreteType":"org.sagebionetworks.repo.model.grid.update.LiteralSetValue","columnName":"type","value":"tall"},{"concreteType":"org.sagebionetworks.repo.model.grid.update.LiteralSetValue","columnName":"footing","value":null}],"filters":[{"concreteType":"org.sagebionetworks.repo.model.grid.query.CellValueFilter","columnName":"height","operator":"GREATER_THAN","value":[12]}],"limit":10}]}}</update__json>
 		</update__example>
 		<update__example>
 		  <description>Set name = 'Dave' for all currently selected rows.</description>
-		  <update__json>{"set":[{"columnName":"name","value":"Dave"}],"filters":[{"concreteType":"org.sagebionetworks.repo.model.grid.query.RowSelectionFilter","isSelected":true}]}</update__json>
+		  <update__json>{"update":{"batch":[{"set":[{"concreteType":"org.sagebionetworks.repo.model.grid.update.LiteralSetValue","columnName":"name","value":"Dave"}],"filters":[{"concreteType":"org.sagebionetworks.repo.model.grid.query.RowSelectionFilter","isSelected":true}]}]}}</update__json>
 		</update__example>
 		<update__example>
 		  <description>Set status = true only for rows with IDs r2 and r5 (explicit RowIdFilter targeting previously retrieved IDs).</description>
-		  <update__json>{"set":[{"columnName":"status","value":true}],"filters":[{"concreteType":"org.sagebionetworks.repo.model.grid.query.RowIdFilter","rowIdsIn":["r2","r5"]}]}</update__json>
+		  <update__json>{"update":{"batch":[{"set":[{"concreteType":"org.sagebionetworks.repo.model.grid.update.LiteralSetValue","columnName":"status","value":true}],"filters":[{"concreteType":"org.sagebionetworks.repo.model.grid.query.RowIdFilter","rowIdsIn":["r2","r5"]}]}]}}</update__json>
 		</update__example>
 	  </examples>
 	</update__examples>  
