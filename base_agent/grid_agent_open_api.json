@@ -156,8 +156,9 @@
           },
           "org.sagebionetworks.repo.model.grid.update.GridUpdateRequest": {
                "type": "object",
-               "properties": {"updateBatch": {
-                    "$ref": "#/components/schemas/org.sagebionetworks.repo.model.grid.update.UpdateBatch"
+               "properties": {"update": {
+                    "type": "string",
+                    "description": "CRITICAL: Due to Bedrock Agent limitations with nested objects, this must be a JSON string (escaped JSON), not an object. Example: \"{\\\"batch\\\":[{\\\"set\\\":[{\\\"concreteType\\\":\\\"org.sagebionetworks.repo.model.grid.update.LiteralSetValue\\\",\\\"columnName\\\":\\\"age\\\",\\\"value\\\":25}]}]}\""
                }},
                "description": "Request to update one or more cells of the current grid session."
           },
