@@ -133,7 +133,7 @@
 				"Description": "AI assistant for the NF Data Portal, helping users discover datasets, publications, studies, and navigate Synapse resources.",
 				"FoundationModel": "us.anthropic.claude-opus-4-5-20251101-v1:0",
 				"IdleSessionTTLInSeconds": 3600,
-				"Instruction": "inserted from the context provider",
+				"Instruction": "You are the NF Portal Assistant helping users navigate the NF Data Portal and Synapse resources.",
 				"SkipResourceInUseCheckOnDelete": true
 			}
 		}

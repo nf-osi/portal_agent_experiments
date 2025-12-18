@@ -2,7 +2,7 @@
     "openapi": "3.0.1",
     "info": {
         "title": "NF Portal Agent API",
-        "description": "API for the NF Data Portal chatbot assistant to search Synapse tables, access documentation, and provide portal navigation",
+        "description": "API for the NF Data Portal chatbot assistant to search Synapse tables and provide portal navigation",
         "version": "v1"
     },
     "paths": {
@@ -29,36 +29,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/org.sagebionetworks.portal.TableQueryResponse"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/portal/v1/knowledge/search": {
-            "post": {
-                "tags": ["PortalAgent"],
-                "description": "Search the knowledge base containing NF Data Portal documentation and Synapse platform documentation. Use this to answer questions about how to use the portal, access data, understand usage requirements, and work with Synapse.",
-                "operationId": "post_portal_v1_knowledge_search",
-                "parameters": [],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/org.sagebionetworks.portal.KnowledgeSearchRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Relevant documentation and information from the knowledge base",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/org.sagebionetworks.portal.KnowledgeSearchResponse"
                                 }
                             }
                         }
@@ -175,70 +145,6 @@
                         "type": "integer",
                         "description": "Total number of rows matching the query (before limit/offset)",
                         "format": "int32"
-                    }
-                }
-            },
-            "org.sagebionetworks.portal.KnowledgeSearchRequest": {
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "The search query or question to find relevant documentation. Can be a natural language question or keywords.",
-                        "minLength": 3
-                    },
-                    "sources": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "enum": ["nf_portal_docs", "synapse_docs", "all"]
-                        },
-                        "description": "Optional. Specify which knowledge base sources to search. Default is 'all'. Use 'nf_portal_docs' for portal-specific questions, 'synapse_docs' for Synapse platform questions.",
-                        "default": ["all"]
-                    },
-                    "maxResults": {
-                        "type": "integer",
-                        "description": "Optional. Maximum number of relevant documentation chunks to return. Default is 5.",
-                        "format": "int32",
-                        "default": 5
-                    }
-                },
-                "required": ["query"]
-            },
-            "org.sagebionetworks.portal.KnowledgeSearchResponse": {
-                "type": "object",
-                "properties": {
-                    "results": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/org.sagebionetworks.portal.KnowledgeResult"
-                        },
-                        "description": "Array of relevant documentation results"
-                    }
-                }
-            },
-            "org.sagebionetworks.portal.KnowledgeResult": {
-                "type": "object",
-                "properties": {
-                    "content": {
-                        "type": "string",
-                        "description": "The relevant documentation content or excerpt"
-                    },
-                    "source": {
-                        "type": "string",
-                        "description": "Source of this documentation (nf_portal_docs or synapse_docs)"
-                    },
-                    "title": {
-                        "type": "string",
-                        "description": "Title or heading of the documentation section"
-                    },
-                    "url": {
-                        "type": "string",
-                        "description": "Optional. URL to the full documentation page if available"
-                    },
-                    "relevanceScore": {
-                        "type": "number",
-                        "description": "Relevance score (0-1) indicating how well this result matches the query",
-                        "format": "float"
                     }
                 }
             },
