@@ -156,7 +156,7 @@
           },
           "org.sagebionetworks.repo.model.grid.update.GridUpdateRequest": {
                "type": "object",
-               "properties": {"update": {
+               "properties": {"updateBatch": {
                     "$ref": "#/components/schemas/org.sagebionetworks.repo.model.grid.update.UpdateBatch"
                }},
                "description": "Request to update one or more cells of the current grid session."
